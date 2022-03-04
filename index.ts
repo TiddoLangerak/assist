@@ -66,7 +66,10 @@ function $(...parsers: Parser[]): Parser {
         const newMatch : Match | null = parser(result.remaining);
         if (newMatch) {
           return {
-            ...result,
+            // TODO: deal better with whitespace
+            token: Token.SEQUENCE,
+            match: result.match + ' ' + newMatch.match,
+            remaining: newMatch.remaining,
             parts: [...result.parts, newMatch]
           };
         }
