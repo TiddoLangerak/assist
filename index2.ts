@@ -48,7 +48,8 @@ function testRename() {
     }
   }
 
-  rename(addBakSuffix)(() => ({ [Symbol.asyncIterator]: fileSelector }));
+  rename(addBakSuffix)(fileSelector);
 }
 
 testRename();
+
