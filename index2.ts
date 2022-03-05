@@ -1,11 +1,13 @@
 // ===== 
 // Let's work backwards
 import { Path, path } from './path';
-import { rename as fsRename } from './safefs';
+import { cwd } from 'process';
+import { Awaitable, AwaitableIterable } from './promise';
+import * as safefs from './safefs';
 
 type StreamingOpResult = never; // TODO
 type OperationResult = null | string | StreamingOpResult;
-type Operation = () => OperationResult;
+type Operation = () => Awaitable<OperationResult>;
 
 function execute(op: Operation) {
   const result = op();
@@ -17,16 +19,18 @@ function execute(op: Operation) {
 type Predicate<T> = (input: T) => boolean;
 type MapFn<IN, OUT> = (input: IN) => OUT;
 
-type FilesystemSelector = () => Iterable<Path>;
-type FilesystemOperation = (selector: FilesystemSelector) => OperationResult;
+type FilesystemSelector = () => Awaitable<AwaitableIterable<Path>>;
+type FilesystemOperation = (selector: FilesystemSelector) => Awaitable<OperationResult>;
 
 function rename(map: MapFn<Path, Path>) : FilesystemOperation {
-  return (selector) => {
-    const paths = selector();
-    for (let oldPath of paths) {
+  return async (selector) => {
+    const paths = await selector();
+
+    for await (let oldPath of paths) {
       const newPath = map(oldPath);
       if (newPath !== oldPath) {
-        fsRename(oldPath, newPath);
+        // TODO: parallel and all that shit
+        await safefs.rename(oldPath, newPath);
       }
     };
     return "";
@@ -36,10 +40,15 @@ function rename(map: MapFn<Path, Path>) : FilesystemOperation {
 
 function testRename() {
   const addBakSuffix: MapFn<Path, Path> = input => path(`${input.fullPath}.bak`);
-  const inputFiles = [path("/foo/bar"), path("/foo/bar/baz.bar"), path("/foo/bar", "qux")];
-  const fileSelector = () => inputFiles;
+  const inputFiles = safefs.listFiles(path(cwd()), false);
+  const fileSelector = async function* mapFiles() {
+    const files = await inputFiles;
+    for await (let file of files) {
+      yield file.path;
+    }
+  }
 
-  rename(addBakSuffix)(fileSelector);
+  rename(addBakSuffix)(() => ({ [Symbol.asyncIterator]: fileSelector }));
 }
 
 testRename();
