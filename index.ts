@@ -85,4 +85,5 @@ const object = oneof(Token.OBJECT, file, folder);
 const eachObject = $(each, object);
 
 
-console.log(eachObject(command));
+
+
