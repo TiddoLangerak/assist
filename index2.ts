@@ -9,8 +9,8 @@ type StreamingOpResult = never; // TODO
 type OperationResult = null | string | StreamingOpResult;
 type Operation = () => Awaitable<OperationResult>;
 
-function execute(op: Operation) {
-  const result = op();
+async function execute(op: Operation) {
+  const result = await op();
   if (result) {
     console.log(result);
   }
@@ -19,10 +19,10 @@ function execute(op: Operation) {
 type Predicate<T> = (input: T) => boolean;
 type MapFn<IN, OUT> = (input: IN) => OUT;
 
-type FilesystemSelector = () => Awaitable<AwaitableIterable<Path>>;
-type FilesystemOperation = (selector: FilesystemSelector) => Awaitable<OperationResult>;
+type FileSystemSelector = () => Awaitable<AwaitableIterable<Path>>;
+type FileSystemOperation = (selector: FileSystemSelector) => Awaitable<OperationResult>;
 
-function rename(map: MapFn<Path, Path>) : FilesystemOperation {
+function rename(map: MapFn<Path, Path>) : FileSystemOperation {
   return async (selector) => {
     const paths = await selector();
 
@@ -37,8 +37,30 @@ function rename(map: MapFn<Path, Path>) : FilesystemOperation {
   }
 }
 
+interface Command {
+  execute: Operation;
+}
 
-function testRename() {
+interface FileSystemCommand extends Command {
+  readonly operation: FileSystemOperation;
+  readonly selector: FileSystemSelector;
+}
+
+function fileSystemCommand(operation: FileSystemOperation, selector: FileSystemSelector): FileSystemCommand {
+  return {
+    operation, selector,
+    execute: () => operation(selector)
+  };
+}
+
+
+
+
+
+// ===== TEST =====
+
+
+async function testRename() {
   const addBakSuffix: MapFn<Path, Path> = input => path(`${input.fullPath}.bak`);
   const inputFiles = safefs.listFiles(path(cwd()), false);
   const fileSelector = async function* mapFiles() {
@@ -48,7 +70,8 @@ function testRename() {
     }
   }
 
-  rename(addBakSuffix)(fileSelector);
+  const command = fileSystemCommand(rename(addBakSuffix), fileSelector);
+  await execute(command.execute);
 }
 
 testRename();

@@ -7,8 +7,8 @@ const dryrunLog = logger('safefs-dryrun');
 const dryrun = true;
 
 export interface File {
-  path: Path;
-  isDir: boolean;
+  readonly path: Path;
+  readonly isDir: boolean;
 }
 
 interface SafeFs {
