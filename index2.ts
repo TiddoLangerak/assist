@@ -78,8 +78,11 @@ match(`rename ${fileTarget}. ${renameOp}`, ({ fileTarget, renameOp } : { fileTar
 interface Template<SubParsers extends Parser<unknown>[]> {
   readonly subParsers: SubParsers;
 }
+
+type ParseResult<T> = { isMatch: false } | { isMatch: true, result: T };
+  
 interface Parser<T> {
-  parse:() => T;
+  parse:(string) => ParseResult<T>;
 }
 
 function t<SubParsers extends Parser<unknown>[]>(strings: TemplateStringsArray, ...subParsers: SubParsers) : Template<SubParsers> {
@@ -88,18 +91,18 @@ function t<SubParsers extends Parser<unknown>[]>(strings: TemplateStringsArray, 
   };
 }
 
-type ParseResult<W> = W extends Parser<infer T> ? T : never;
-type ParseResults<Tuple extends [...any[]]> = {
-  [Index in keyof Tuple]: ParseResult<Tuple[Index]>;
+type ParseResultType<W> = W extends Parser<infer T> ? T : never;
+type ParseResultTypes<Tuple extends [...any[]]> = {
+  [Index in keyof Tuple]: ParseResultType<Tuple[Index]>;
 };
 
-//TODO: would be nice if we could somehow make typescript resolve the type aliasses for ParseResults<ARGS>, but not sure how
-function m3<SubParsers extends Parser<any>[], RESULT>(template: Template<SubParsers>, parser: (...args: ParseResults<SubParsers>) => RESULT): RESULT {
+//TODO: would be nice if we could somehow make typescript resolve the type aliasses for ParseResultTypes<ARGS>, but not sure how
+function m3<SubParsers extends Parser<any>[], RESULT>(template: Template<SubParsers>, parser: (...args: ParseResultTypes<SubParsers>) => RESULT): RESULT {
   // Map doesn't preserve tuples, and I don't see a way to create a map that can. So we'll need to cast to any
-  return parser(...template.subParsers.map(a => a.parse()) as any);
+  return parser(...template.subParsers.map(a => a.parse("TODO")) as any);
 }
 function parser<T>(i: T): Parser<T> {
-  return { parse: () => i };
+  return { parse: (_) => ({ isMatch: true, result: i }) };
 }
 m3(t`foo ${parser(3)} bar ${parser('baz')}`, (x: number, y: string) => "foo");
 m3(t`foo ${parser(3)} bar ${parser('baz')}`, (x: number, y: number) => "foo");
