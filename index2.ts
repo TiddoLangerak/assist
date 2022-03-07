@@ -82,11 +82,9 @@ interface Template<SubParsers extends Parser<unknown>[]> {
 
 type ParseResult<T> = { isMatch: false } | { isMatch: true, result: T };
   
-interface Parser<T> {
-  parse:(input: string) => ParseResult<T>;
-}
+type Parser<T> = (input: string) => ParseResult<T>;
 
-function t<SubParsers extends Parser<unknown>[]>(literals: TemplateStringsArray, ...subParsers: SubParsers) : Template<SubParsers> {
+function $<SubParsers extends Parser<unknown>[]>(literals: TemplateStringsArray, ...subParsers: SubParsers) : Template<SubParsers> {
   return {
     literals,
     subParsers
@@ -99,15 +97,18 @@ type ParseResultTypes<Tuple extends [...any[]]> = {
 };
 
 //TODO: would be nice if we could somehow make typescript resolve the type aliasses for ParseResultTypes<ARGS>, but not sure how
-function m3<SubParsers extends Parser<any>[], RESULT>(template: Template<SubParsers>, parser: (...args: ParseResultTypes<SubParsers>) => RESULT): RESULT {
+function match<SubParsers extends Parser<any>[], Result>(template: Template<SubParsers>, builder: (...args: ParseResultTypes<SubParsers>) => Result): Parser<Result> {
   // Map doesn't preserve tuples, and I don't see a way to create a map that can. So we'll need to cast to any
-  return parser(...template.subParsers.map(a => a.parse("TODO")) as any);
+  return input => ({
+    isMatch: true,
+    result: builder(...template.subParsers.map(subParser => subParser("TODO")) as any)
+  });
 }
 function parser<T>(i: T): Parser<T> {
-  return { parse: (_) => ({ isMatch: true, result: i }) };
+  return (_) => ({ isMatch: true, result: i });
 }
-m3(t`foo ${parser(3)} bar ${parser('baz')}`, (x: number, y: string) => "foo");
-m3(t`foo ${parser(3)} bar ${parser('baz')}`, (x: number, y: number) => "foo");
+match($`foo ${parser(3)} bar ${parser('baz')}`, (x: number, y: string) => "foo");
+match($`foo ${parser(3)} bar ${parser('baz')}`, (x: number, y: number) => "foo");
 
 
 
