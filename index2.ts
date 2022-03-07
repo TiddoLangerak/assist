@@ -76,17 +76,19 @@ match(`rename ${fileTarget}. ${renameOp}`, ({ fileTarget, renameOp } : { fileTar
 
 
 interface Template<SubParsers extends Parser<unknown>[]> {
+  readonly literals: TemplateStringsArray;
   readonly subParsers: SubParsers;
 }
 
 type ParseResult<T> = { isMatch: false } | { isMatch: true, result: T };
   
 interface Parser<T> {
-  parse:(string) => ParseResult<T>;
+  parse:(input: string) => ParseResult<T>;
 }
 
-function t<SubParsers extends Parser<unknown>[]>(strings: TemplateStringsArray, ...subParsers: SubParsers) : Template<SubParsers> {
+function t<SubParsers extends Parser<unknown>[]>(literals: TemplateStringsArray, ...subParsers: SubParsers) : Template<SubParsers> {
   return {
+    literals,
     subParsers
   };
 }
