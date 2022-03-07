@@ -75,34 +75,34 @@ match(`rename ${fileTarget}. ${renameOp}`, ({ fileTarget, renameOp } : { fileTar
 */
 
 
-interface Matcher<ARGS extends any[]> {
-  readonly args: ARGS;
+interface Template<SubParsers extends Parser<unknown>[]> {
+  readonly subParsers: SubParsers;
+}
+interface Parser<T> {
+  parse:() => T;
 }
 
-function t<ARGS extends any[]>(strings: TemplateStringsArray, ...args: ARGS) : Matcher<ARGS> {
+function t<SubParsers extends Parser<unknown>[]>(strings: TemplateStringsArray, ...subParsers: SubParsers) : Template<SubParsers> {
   return {
-    args
+    subParsers
   };
 }
 
-interface Wrapper<T> {
-  readonly val: T
-}
-type Unwrap<W> = W extends Wrapper<infer T> ? T : never;
-type UnwrapTuple<Tuple extends [...any[]]> = {
-  [Index in keyof Tuple]: Unwrap<Tuple[Index]>;
+type ParseResult<W> = W extends Parser<infer T> ? T : never;
+type ParseResults<Tuple extends [...any[]]> = {
+  [Index in keyof Tuple]: ParseResult<Tuple[Index]>;
 };
 
-//TODO: would be nice if we could somehow make typescript resolve the type aliasses for UnwrapTuple<ARGS>, but not sure how
-function m3<ARGS extends Wrapper<any>[], RESULT>(matcher: Matcher<ARGS>, parser: (...args: UnwrapTuple<ARGS>) => RESULT): RESULT {
+//TODO: would be nice if we could somehow make typescript resolve the type aliasses for ParseResults<ARGS>, but not sure how
+function m3<SubParsers extends Parser<any>[], RESULT>(template: Template<SubParsers>, parser: (...args: ParseResults<SubParsers>) => RESULT): RESULT {
   // Map doesn't preserve tuples, and I don't see a way to create a map that can. So we'll need to cast to any
-  return parser(...matcher.args.map(a => a.val) as any);
+  return parser(...template.subParsers.map(a => a.parse()) as any);
 }
-function wrapper<T>(i: T): Wrapper<T> {
-  return { val : i };
+function parser<T>(i: T): Parser<T> {
+  return { parse: () => i };
 }
-m3(t`foo ${wrapper(3)} bar ${wrapper('baz')}`, (x: number, y: string) => "foo");
-m3(t`foo ${wrapper(3)} bar ${wrapper('baz')}`, (x: number, y: number) => "foo");
+m3(t`foo ${parser(3)} bar ${parser('baz')}`, (x: number, y: string) => "foo");
+m3(t`foo ${parser(3)} bar ${parser('baz')}`, (x: number, y: number) => "foo");
 
 
 
