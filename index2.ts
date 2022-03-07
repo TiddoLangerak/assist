@@ -52,28 +52,9 @@ function fileSystemCommand(operation: FileSystemOperation, selector: FileSystemS
     execute: () => operation(selector)
   };
 }
-// For naming, what I need to think about is this:
-// - Every "thing" has multiple representations:
-//  - A function that actually performs the operation
-//  - An object that represents the (part of) operation, which can be folded into the function
-//
-//
-//
-// Do I need both?
-// Rename files recursively. Remove prefix matching /\d+\./.
-// When reading this word for word:
-// Rename -> operation = rename
-// files -> selectorFunc = listFiles
-// recursively -> selector = listFiles(., true)
-// Remove
 
 
-/*
-match(`rename ${fileTarget}. ${renameOp}`, ({ fileTarget, renameOp } : { fileTarget: FileSystemSelector, renameOp : MapFn<Path, Path> } ) => {
-
-});
-*/
-
+// Parser stuff
 
 interface Template<SubParsers extends Parser<unknown>[]> {
   readonly literals: TemplateStringsArray;
