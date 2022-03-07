@@ -74,14 +74,9 @@ match(`rename ${fileTarget}. ${renameOp}`, ({ fileTarget, renameOp } : { fileTar
 });
 */
 
-function hi(strings:TemplateStringsArray, name:string) {     // hi is tag function
-  return 4;
-}
-const x : string = hi`foo ${"bar"}`;
-
 
 interface Matcher<ARGS extends any[]> {
-  args: ARGS;
+  readonly args: ARGS;
 }
 
 function t<ARGS extends any[]>(strings: TemplateStringsArray, ...args: ARGS) : Matcher<ARGS> {
@@ -90,15 +85,27 @@ function t<ARGS extends any[]>(strings: TemplateStringsArray, ...args: ARGS) : M
   };
 }
 
-function m<ARGS extends any[], RESULT>(matcher: Matcher<ARGS>, parser: (...args: ARGS) => RESULT): RESULT {
-  return parser(matcher.args);
+interface Wrapper<T> {
+  readonly val: T
 }
+type Unwrap<W> = W extends Wrapper<infer T> ? T : never;
+type UnwrapTuple<Tuple extends [...any[]]> = {
+  [Index in keyof Tuple]: Unwrap<Tuple[Index]>;
+};
 
-//correct
-m(t`foo ${3} bar ${'baz'}`, (x: number, y: string) => "foo");
-//incorrect
-m(t`foo ${'wut'} bar ${'baz'}`, (x: number, y: string) => "foo");
-// TODO: m shouldn't take any as parameters, but should have a structure that allows both matching and extracting the result
+//TODO: would be nice if we could somehow make typescript resolve the type aliasses for UnwrapTuple<ARGS>, but not sure how
+function m3<ARGS extends Wrapper<any>[], RESULT>(matcher: Matcher<ARGS>, parser: (...args: UnwrapTuple<ARGS>) => RESULT): RESULT {
+  // Map doesn't preserve tuples, and I don't see a way to create a map that can. So we'll need to cast to any
+  return parser(...matcher.args.map(a => a.val) as any);
+}
+function wrapper<T>(i: T): Wrapper<T> {
+  return { val : i };
+}
+m3(t`foo ${wrapper(3)} bar ${wrapper('baz')}`, (x: number, y: string) => "foo");
+m3(t`foo ${wrapper(3)} bar ${wrapper('baz')}`, (x: number, y: number) => "foo");
+
+
+
 
 
 
