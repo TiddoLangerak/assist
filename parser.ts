@@ -47,6 +47,7 @@ export function parse<SubParsers extends Parser<any>[], Result>(template: Templa
       if (!parseResult.isMatch) {
         return nomatch;
       }
+      input = input.substr(parseResult.match.length);
       match += parseResult.match;
       subResults.push(parseResult.result);
     }

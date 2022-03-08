@@ -16,7 +16,6 @@ async function execute(op: Operation) {
   }
 }
 
-type Predicate<T> = (input: T) => boolean;
 type MapFn<IN, OUT> = (input: IN) => OUT;
 
 type FileSystemSelector = () => Awaitable<AwaitableIterable<Path>>;
