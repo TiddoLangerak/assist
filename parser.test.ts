@@ -1,5 +1,5 @@
 import { expect } from './test';
-import { parse, $, ParseResult, nomatch } from './parser';
+import { parse, $, ParseResult, nomatch, parseRe } from './parser';
 
 const fooParser = parse($`foo`, () => null);
 
@@ -26,7 +26,14 @@ const numberParser = (input: string) : ParseResult<number> => {
 const chapterParser= parse($`Chapter ${numberParser}`, (chapter) => ({ chapter }));
 console.log("Chapter 14", chapterParser("Chapter 14"));
 const result = chapterParser("Chapter 14");
-expect(result.isMatch && result.result.chapter === 14);
+expect(result.isMatch);
+expect(result.result.chapter === 14);
 
 console.log("Chapter foo", chapterParser("Chapter foo"));
 expect(!chapterParser("Chapter foo").isMatch);
+
+const reChapterParser = parseRe(/Chapter (\d+)/, (match) => Number(match[1]));
+const reResult = reChapterParser("Chapter 15");
+console.log("Chapter 15", reResult);
+expect(reResult.isMatch);
+expect(reResult.result === 15);

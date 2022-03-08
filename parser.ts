@@ -1,3 +1,4 @@
+import { MapFn } from './function';
 export type ParseResult<T> = { isMatch: false } | { isMatch: true, match: string, result: T };
 export type Parser<T> = (input: string) => ParseResult<T>;
 export interface Template<SubParsers extends Parser<unknown>[]> {
@@ -18,6 +19,23 @@ export function $<SubParsers extends Parser<unknown>[]>(literals: TemplateString
     literals,
     subParsers
   };
+}
+
+export function parseRe<R>(re: RegExp, toResult: MapFn<RegExpMatchArray, R>): Parser<R> {
+  if (re.global) {
+    throw new Error("Cannot use global regexp");
+  }
+  return input => {
+    const reMatch = input.match(re);
+    if (!reMatch) {
+      return nomatch;
+    }
+    return {
+      isMatch: true,
+      match: reMatch[0],
+      result: toResult(reMatch)
+    }
+  }
 }
 
 //TODO: would be nice if we could somehow make typescript resolve the type aliasses for ParseResultTypes<ARGS>, but not sure how
