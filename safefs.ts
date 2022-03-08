@@ -6,6 +6,7 @@ import { Awaitable, AwaitableIterable } from './promise';
 const dryrunLog = logger('safefs-dryrun');
 const dryrun = true;
 
+export type FileSystemSelector = () => Awaitable<AwaitableIterable<Path>>;
 export interface File {
   readonly path: Path;
   readonly isDir: boolean;
