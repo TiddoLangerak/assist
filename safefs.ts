@@ -4,7 +4,7 @@ import * as fs from 'fs/promises';
 import { Awaitable, AwaitableIterable } from './promise';
 
 const dryrunLog = logger('safefs-dryrun');
-const dryrun = true;
+export const dryrun = true;
 
 export type FileSystemSelector = () => Awaitable<AwaitableIterable<Path>>;
 export interface File {

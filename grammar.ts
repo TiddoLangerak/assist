@@ -17,7 +17,7 @@ async function* listFilePaths() {
 
 // TODO: support more targets
 const target : Parser<FileSystemSelector> = 
-  parse($`files`, () => listFilePaths); // TODO: actually filter out files only.
+  parse($`files and folders`, () => listFilePaths); // TODO: actually filter out files only.
 
 // TODO: make generic. Parse open ended input
 const addBakSuffix: MapFn<Path, Path> = input => path(`${input.fullPath}.bak`);
@@ -26,9 +26,12 @@ const renameOp : Parser<MapFn<Path, Path>> =
 
 const rename : Parser<Operation> = 
   parse(
-    $`rename ${target} ${renameOp}`,
-    (target: FileSystemSelector, renameOp: MapFn<Path, Path>) => {
+    $`${renameOp} to ${target}`,
+    (renameOp: MapFn<Path, Path>, target: FileSystemSelector) => {
       return () => ops.rename(renameOp)(target)
     }
   );
+
+export const grammar = rename;
+
 
