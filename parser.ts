@@ -21,7 +21,7 @@ export function $<SubParsers extends Parser<unknown>[]>(literals: TemplateString
   };
 }
 
-export function parseRe<R>(re: RegExp, toResult: MapFn<RegExpMatchArray, R>): Parser<R> {
+export function parseRe<R>(re: RegExp, toResult?: MapFn<RegExpMatchArray, R>): Parser<R> {
   if (re.global) {
     throw new Error("Cannot use global regexp");
   }
@@ -33,7 +33,7 @@ export function parseRe<R>(re: RegExp, toResult: MapFn<RegExpMatchArray, R>): Pa
     return {
       isMatch: true,
       match: reMatch[0],
-      result: toResult(reMatch)
+      result: toResult ? toResult(reMatch) : reMatch[0]
     }
   }
 }
