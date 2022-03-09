@@ -22,17 +22,7 @@ type ValidateComposeTail<T extends any[], I, O1, O2, REST extends any[]> = (
           ]
 );
 
-    /**
-     * Compose guard. When valid, output is same as input. When not valid, output matches input up to error
-     */
-type ComposeArgs<T extends any[]> =
-  T extends [MapFn<infer I, infer O>] // Base case: single function.
-  ? T
-  : (
-    // Recursive case: test if the first 2 functions are valid
-    T extends ValidateComposeHead2<infer I, infer O1, infer O2, infer REST>
-      ? ValidateComposeTail<T, I, O1, O2, REST>
-      : ( // Error case
+type ComposeError<T extends any[]> =( // Error case
          // If the first 2 don't match, then we construct a type that will fail on the second parameter (i.e. a type that forces a match), and any[] for the remainder
          // We have some extra conditional here to capture the parameters again (given that the previous conditional was NOT a match)
         T extends [
@@ -49,6 +39,18 @@ type ComposeArgs<T extends any[]> =
             ...rest: any[]
           ]
     )
+
+    /**
+     * Compose guard. When valid, output is same as input. When not valid, output matches input up to error
+     */
+type ComposeArgs<T extends any[]> =
+  T extends [MapFn<infer I, infer O>] // Base case: single function.
+  ? T
+  : (
+    // Recursive case: test if the first 2 functions are valid
+    T extends ValidateComposeHead2<infer I, infer O1, infer O2, infer REST>
+      ? ValidateComposeTail<T, I, O1, O2, REST>
+      : ComposeError<T>
   )
 
   // THIS IS THE ONE!!!
