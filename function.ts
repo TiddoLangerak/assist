@@ -47,17 +47,16 @@ type ValidateComposeTail<T extends any[]> =
     Tail<T> extends ValidatedTail
     // If the tail is validated, then we're good to go, and can return our input unchanged.
     ? T
-    // If the tail is NOT valid, then we need to construct our validated version of the tail, recursively
+    // If the tail is NOT valid, then we need to construct our validated version of the tail, such that we get the error at the right place
     : [Head<T>, ...ValidatedTail]
   )
   : never
-
 
 /**
  * Compose guard. When valid, output is same as input. When not valid, output matches input up to error
  */
 type ValidComposeArgs<T extends any[]> =
-  T extends [MapFn<infer I, infer O>] // Base case: single function.
+  T extends [(i: infer I) => infer O] // Base case: single function.
   ? T
   : (
     // Recursive case: test if the first 2 functions are valid
