@@ -1,20 +1,13 @@
 export type MapFn<In, Out> = (input: In) => Out;
 
-    /**
-     * Compose guard. When valid, output is same as input. When not valid, output matches input up to error
-     */
-type ComposeArgs<T extends any[]> =
-  T extends [MapFn<infer I, infer O>] // Base case: single function.
-  ? T
-  : (
-    // Recursive case: test if the first 2 functions are valid
-    T extends [
-      h1: MapFn<infer I, infer O1>,
-      h2: MapFn<infer O1, infer O2>,
-      ...rest: infer REST
-    ]
-      ? (
-        // If the first 2 are valid, then we recursively test if the second onwards is valid
+// TODO: maybe unwrap MapFn again for better errors?
+type ValidateComposeHead2<I, O1, O2, REST extends any[]> = [
+  h1: MapFn<I, O1>,
+  h2: MapFn<O1, O2>
+  ...rest: REST
+];
+
+type ValidateComposeTail<T extends any[], I, O1, O2, REST extends any[]> = (
         [
           h: MapFn<O1, O2>,
           ...rest: REST
@@ -27,7 +20,18 @@ type ComposeArgs<T extends any[]> =
             h: MapFn<I, O1>,
             ...rest: ComposeArgs<[MapFn<O1, O2>, ...REST]>
           ]
-      )
+);
+
+    /**
+     * Compose guard. When valid, output is same as input. When not valid, output matches input up to error
+     */
+type ComposeArgs<T extends any[]> =
+  T extends [MapFn<infer I, infer O>] // Base case: single function.
+  ? T
+  : (
+    // Recursive case: test if the first 2 functions are valid
+    T extends ValidateComposeHead2<infer I, infer O1, infer O2, infer REST>
+      ? ValidateComposeTail<T, I, O1, O2, REST>
       : ( // Error case
          // If the first 2 don't match, then we construct a type that will fail on the second parameter (i.e. a type that forces a match), and any[] for the remainder
          // We have some extra conditional here to capture the parameters again (given that the previous conditional was NOT a match)
