@@ -83,6 +83,28 @@ type ComposeFromArgs<T extends any[]> =
       : never
     );
 
+type CG<T extends any[]> =
+  T extends [(i: infer I) => infer O]
+  ? T
+  : (
+    T extends [h1: (i: infer I) => infer IO, h2: (i: infer IO) => infer O, ...rest: infer R]
+    ? (
+      [(i: IO) => O, ...R] extends CG<[(i: IO) => O, ...R]>
+        ? T
+        : never
+    )
+    : never
+  )
+
+  // THIS IS THE ONE!!!
+  // It rejects the proper thing
+function cg4<T extends any[]>(...funcs: CG<T>) {}
+
+cg4((i: string) => 3);
+cg4((i: string) => 3, (i: number) => i);
+cg4((i: string) => 3, (i: string) => i);
+
+
 function composeFromArgs<T extends any[]>(...funcs: ComposeFromArgs<T>) {
   return null as any;
 }
