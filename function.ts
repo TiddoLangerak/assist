@@ -31,19 +31,29 @@ type ComposeGuard<T extends any[]> =
   T extends [(i: infer I) => infer O]
   ? T
   : (
-    T extends [head: (i: infer I) => infer O, ...rest: ComposeGuard2<infer O, infer R>]
+    T extends [head: (i: infer I) => infer O, ...rest: ComposeGuard2<infer O, infer R> extends infer R2 ? (R2 extends any[] ? R2 : [never]) : [never]]
     ? T
     : never
   );
 
 type ComposeGuard2<I, T extends any[]> =
-  T extends[(i: I) => infer O]
-  ? (i: I) => O
+  T extends [(i: I) => infer O]
+  ? T 
   : (
-    T extends [head: (i: I) => infer O, ...rest: ComposeGuard2<infer O, infer R>]
+    T extends [head: (i: I) => infer O, ...rest: ComposeGuard2<infer O, infer R> extends infer R2 ? (R2 extends any[] ? R2 : [never]) : [never]]
     ? T
     : [never]
   );
+
+function cg(i: ComposeGuard<[(i: number) => number]>) {
+}
+cg([(i: number) => i]);
+function cg2(i: ComposeGuard<[(i: number) => number, (i: number) => string]>) {
+}
+cg2([(i: number) => i, (i: number) => "foo"]);
+function cg3(i: ComposeGuard<[(i: number) => number, (i: string) => string]>) {
+}
+cg3([(i: number) => i, (i: string) => "foo"]);
 
 
 type Compose1<T extends any[]> =
