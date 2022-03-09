@@ -91,9 +91,15 @@ type CG<T extends any[]> =
     ? (
       [(i: IO) => O, ...R] extends CG<[(i: IO) => O, ...R]>
         ? T
+        : [h: (i: IO) => O, h2: (i: O) => any, ...rest: any[]]
+    )
+    //: [h: (i: I) => IO, h2: (i: IO) => any, ...rest: any[]]
+    //: never
+    : ( // Error case
+       T extends [h: (i: infer I) => infer O, ...rest: infer R]
+        ? [h: (i: I) => O, h2: (i: O) => any, ...rest: any[]]
         : never
     )
-    : never
   )
 
   // THIS IS THE ONE!!!
