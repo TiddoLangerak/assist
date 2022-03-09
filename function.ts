@@ -74,10 +74,31 @@ type Compose2<I, T extends any[]> =
     : INVALID_COMPOSE<T>
   );
 
+type ComposeFromArgs<T extends any[]> =
+  T extends [infer I, infer O]
+    ? [(i:I) => O]
+    : (
+      T extends [h: infer I, m: infer IO, ...rest: infer R]
+      ? [(i:I) => IO, ...ComposeFromArgs<[IO, ...R]>]
+      : never
+    );
+
+function composeFromArgs<T extends any[]>(...funcs: ComposeFromArgs<T>) {
+  return null as any;
+}
+
+composeFromArgs<[string, number]>((i: string) => 3);
+composeFromArgs<[string, number, number]>((i: string) => 3, (i: number) => i);
+composeFromArgs<[string, string, number]>((i: string) => 3, (i: string) => i);
+
+
 //type Compose3<I, O, T extends [(i: I) => O]> = (i: I) => O;
 //type Compose4<I, O1, O2, T extends [head: (i: I) => O1, ...rest: Compose4<
 
 function compose<T extends any[]>(...funcs: ComposeGuard<T>) : Compose1<T> {
+  return null as any;
+}
+function compose2<T extends any[], R extends Compose1<T>>(...funcs: T) : R {
   return null as any;
 }
 
