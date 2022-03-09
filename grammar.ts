@@ -24,8 +24,8 @@ const target : Parser<FileSystemSelector> =
 
 // TODO: make generic. Parse open ended input
 const addSuffix = (suffix: string) => (input: Path) => path(`${input.fullPath}${suffix}`);
-const renameOp : Parser<MapFn<Path, Path>> =
-  parse($`add suffix ${fileName}`, (suffix) => addSuffix(suffix));
+const addSuffixOp = parse($`add suffix ${fileName}`, (suffix) => addSuffix(suffix));
+const renameOp = addSuffixOp;
 
 const rename : Parser<Operation> = 
   parse(

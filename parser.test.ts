@@ -1,5 +1,5 @@
 import { expect } from './test';
-import { parse, $, ParseResult, nomatch, parseRe } from './parser';
+import { parse, $, ParseResult, nomatch, parseRe, oneOf } from './parser';
 
 const fooParser = parse($`foo`, () => null);
 
@@ -37,3 +37,13 @@ const reResult = reChapterParser("Chapter 15");
 console.log("Chapter 15", reResult);
 expect(reResult.isMatch);
 expect(reResult.result === 15);
+
+const oneOfParser = oneOf(parse($`foo`, () => 3), parse($`bar`, () => 4));
+const r1 = oneOfParser("foo");
+const r2 = oneOfParser("bar");
+const r3 = oneOfParser("something else");
+expect(r1.isMatch);
+expect(r2.isMatch);
+expect(!r3.isMatch);
+expect(r1.result === 3);
+expect(r2.result === 4);
