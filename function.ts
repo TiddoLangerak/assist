@@ -50,15 +50,15 @@ type ValidComposeArgs<T extends any[]> =
     // Recursive case: test if the first 2 functions are valid
     T extends ComposeTuple2<infer I, infer O1, infer O2, infer REST>
       ? (
+        // Then recursively validate the tail. 
+        // If the tail is valid, then ValidComposeArgs will return the tail itself.
+        // We use extends as an == sign here.
+        // I.e. we compare the tail with the validated version of the tail
         ComposeTuple1<O1, O2, REST> extends ValidComposeArgs<ComposeTuple1<O1, O2, REST>> 
-        // If it is, all good!
+          // If the tail is validated, then we're good to go, and can return our input unchanged.
           ? T 
-        // If recursive fails, then we propagate the "Error" type further (see below)
-        // TODO: this currently duplicates the ValidComposeArgs clause, we can maybe DRY this up
-          : [
-            h: MapFn<I, O1>,
-            ...rest: ValidComposeArgs<[MapFn<O1, O2>, ...REST]>
-          ]
+          // If the tail is NOT valid, then we need to construct our validated version of the tail, recursively
+          : ComposeTuple1<I, O1, ValidComposeArgs<ComposeTuple1<O1, O2, REST>>>
       )
       : ComposeError<T>
     )
