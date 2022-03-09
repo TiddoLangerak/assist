@@ -27,6 +27,24 @@ type Tuple2<T extends any[]> =
 class INVALID<T> {};
 type INVALID_COMPOSE<T> = (i: INVALID<T>) => INVALID<T>;
 
+type ComposeGuard<T extends any[]> =
+  T extends [(i: infer I) => infer O]
+  ? T
+  : (
+    T extends [head: (i: infer I) => infer O, ...rest: ComposeGuard2<infer O, infer R>]
+    ? T
+    : never
+  );
+
+type ComposeGuard2<I, T extends any[]> =
+  T extends[(i: I) => infer O]
+  ? (i: I) => O
+  : (
+    T extends [head: (i: I) => infer O, ...rest: ComposeGuard2<infer O, infer R>]
+    ? T
+    : [never]
+  );
+
 
 type Compose1<T extends any[]> =
   T extends [(i: infer I) => infer O]
@@ -49,7 +67,7 @@ type Compose2<I, T extends any[]> =
 //type Compose3<I, O, T extends [(i: I) => O]> = (i: I) => O;
 //type Compose4<I, O1, O2, T extends [head: (i: I) => O1, ...rest: Compose4<
 
-function compose<T extends any[]>(...funcs: T) : Compose1<T> {
+function compose<T extends any[]>(...funcs: ComposeGuard<T>) : Compose1<T> {
   return null as any;
 }
 
