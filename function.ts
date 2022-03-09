@@ -24,11 +24,13 @@ type Tuple2<T extends any[]> =
     : never
   );
 
+type ComposeHelper<I, T extends [head: (i: I) => any, ...rest: any[]]> = T;
+
 type Compose1<T extends any[]> =
   T extends [(i: infer I) => infer O]
   ? (i: I) => O
   : (
-    T extends [head: (i: infer I) => infer O, ...rest: infer R]
+    T extends [head: (i: infer I) => infer O, ...rest: ComposeHelper<infer O, infer R>]
     ? (i: I) => ReturnType<Compose2<O, R>>
     : never
   );
@@ -37,7 +39,7 @@ type Compose2<I, T extends any[]> =
   T extends[(i: I) => infer O]
   ? (i: I) => O
   : (
-    T extends [head: (i: I) => infer O, ...rest: infer R]
+    T extends [head: (i: I) => infer O, ...rest: ComposeHelper<infer O, infer R>]
     ? (i: I) => ReturnType<Compose2<O, R>>
     : never
   );
