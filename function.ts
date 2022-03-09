@@ -24,7 +24,9 @@ type Tuple2<T extends any[]> =
     : never
   );
 
-class INVALID_COMPOSE {};
+class INVALID<T> {};
+type INVALID_COMPOSE<T> = (i: INVALID<T>) => INVALID<T>;
+
 
 type Compose1<T extends any[]> =
   T extends [(i: infer I) => infer O]
@@ -32,7 +34,7 @@ type Compose1<T extends any[]> =
   : (
     T extends [head: (i: infer I) => infer O, ...rest: infer R]
     ? (i: I) => ReturnType<Compose2<O, R>>
-    : (i: INVALID_COMPOSE) => INVALID_COMPOSE
+    : INVALID_COMPOSE<T>
   );
 
 type Compose2<I, T extends any[]> =
@@ -41,8 +43,11 @@ type Compose2<I, T extends any[]> =
   : (
     T extends [head: (i: I) => infer O, ...rest: infer R]
     ? (i: I) => ReturnType<Compose2<O, R>>
-    : (i: INVALID_COMPOSE) => INVALID_COMPOSE
+    : INVALID_COMPOSE<T>
   );
+
+//type Compose3<I, O, T extends [(i: I) => O]> = (i: I) => O;
+//type Compose4<I, O1, O2, T extends [head: (i: I) => O1, ...rest: Compose4<
 
 function compose<T extends any[]>(...funcs: T) : Compose1<T> {
   return null as any;
@@ -54,6 +59,10 @@ const cc2 = compose((i: string) => i.length, (n: number) => [n]);
 const r2: number[] = cc2("fo");
 const ic = compose((i: string) => i.length, (i: string) => i.length);
 const r3 : string = ic("foo");
+
+type Simple<I> = I extends number ? I : never;
+const s : Simple<number> = 3;
+const s2: Simple<string> = 3;
 
 const c : Compose1<[(i: string) => number]> = (i: string) => i.length;
 const c2: Compose1<[(i: string) => number, (i: number) => [number]]> = (i: string) => [i.length];
