@@ -1,18 +1,25 @@
 import { parse, parseRe, $, Parser } from './parser';
 import * as ops from './operations';
 import { Operation } from './operations';
-import { FileSystemSelector } from './safefs';
+import { FileSystemSelector, File } from './safefs';
 import * as safefs from './safefs';
-import { Fn } from './function';
+import { Fn, pipe } from './function';
 import { path, Path } from './path';
 import { cwd } from 'process';
+import { map } from './awaitableIterable';
+import { AwaitableIterable, PromisedIterable } from './promise';
 
 // TODO: probably move this to safefs
-async function* listFilePaths() {
-  const files = await safefs.listFiles(path(cwd()), false);
-  for await (let file of files) {
-    yield file.path;
-  }
+
+// TODO: figure out the pipe version of this
+/*
+const listFilePaths = () => pipe(
+  safefs.listFiles(path(cwd()), false),
+  map((file: File) => file.path)
+);*/
+function listFilePaths() : AwaitableIterable<Path> {
+  const files = safefs.listFiles(path(cwd()), false);
+  return map((file: File) => file.path)(files);
 }
 
 // TODO: add support for quoting
