@@ -1,6 +1,6 @@
 import { Path } from './path';
 import { Awaitable, AwaitableIterable } from './promise';
-import { MapFn } from './function';
+import { Fn } from './function';
 import * as safefs from './safefs';
 import { FileSystemSelector } from './safefs';
 
@@ -10,7 +10,7 @@ export type Operation = () => Awaitable<OperationResult>;
 
 export type FileSystemOperation = (selector: FileSystemSelector) => Awaitable<OperationResult>;
 
-export function rename(map: MapFn<Path, Path>) : FileSystemOperation {
+export function rename(map: Fn<Path, Path>) : FileSystemOperation {
   return async (selector) => {
     const paths = await selector();
 

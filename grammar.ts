@@ -3,7 +3,7 @@ import * as ops from './operations';
 import { Operation } from './operations';
 import { FileSystemSelector } from './safefs';
 import * as safefs from './safefs';
-import { MapFn } from './function';
+import { Fn } from './function';
 import { path, Path } from './path';
 import { cwd } from 'process';
 
@@ -30,7 +30,7 @@ const renameOp = addSuffixOp;
 const rename : Parser<Operation> = 
   parse(
     $`${renameOp} to ${target}`,
-    (renameOp: MapFn<Path, Path>, target: FileSystemSelector) => {
+    (renameOp: Fn<Path, Path>, target: FileSystemSelector) => {
       return () => ops.rename(renameOp)(target)
     }
   );

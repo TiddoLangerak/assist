@@ -2,7 +2,7 @@ import { Path, path } from './path';
 import { cwd } from 'process';
 import * as safefs from './safefs';
 import { execute, rename, FileSystemSelector, FileSystemOperation, Operation } from './operations';
-import { MapFn } from './function';
+import { Fn } from './function';
 // ===== 
 // Let's work backwards
 
@@ -51,7 +51,7 @@ function fileSystemCommand(operation: FileSystemOperation, selector: FileSystemS
 
 
 async function testRename() {
-  const addBakSuffix: MapFn<Path, Path> = input => path(`${input.fullPath}.bak`);
+  const addBakSuffix: Fn<Path, Path> = input => path(`${input.fullPath}.bak`);
   const inputFiles = safefs.listFiles(path(cwd()), false);
   const fileSelector = async function* mapFiles() {
     const files = await inputFiles;

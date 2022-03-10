@@ -1,4 +1,4 @@
-import { MapFn } from './function';
+import { Fn } from './function';
 export type ParseResult<T> = { isMatch: false } | { isMatch: true, match: string, result: T };
 export type Parser<T> = (input: string) => ParseResult<T>;
 export interface Template<SubParsers extends Parser<unknown>[]> {
@@ -21,7 +21,7 @@ export function $<SubParsers extends Parser<unknown>[]>(literals: TemplateString
   };
 }
 
-export function parseRe<R>(re: RegExp, toResult?: MapFn<RegExpMatchArray, R>): Parser<R> {
+export function parseRe<R>(re: RegExp, toResult?: Fn<RegExpMatchArray, R>): Parser<R> {
   if (re.global) {
     throw new Error("Cannot use global regexp");
   }
