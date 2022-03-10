@@ -6,7 +6,7 @@ import { Awaitable, AwaitableIterable } from './promise';
 const dryrunLog = logger('safefs-dryrun');
 export const dryrun = true;
 
-export type FileSystemSelector = () => Awaitable<AwaitableIterable<Path>>;
+export type FileSystemSelector = () => AwaitableIterable<Path>;
 export interface File {
   readonly path: Path;
   readonly isDir: boolean;
@@ -14,7 +14,7 @@ export interface File {
 
 interface SafeFs {
   rename: (from: Path, to: Path) => Awaitable<void>;
-  listFiles: (root: Path, recursive: boolean) => Awaitable<AwaitableIterable<File>>
+  listFiles: (root: Path, recursive: boolean) => AwaitableIterable<File>
 }
 
 const realFs: SafeFs = {

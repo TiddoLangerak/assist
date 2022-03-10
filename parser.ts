@@ -88,7 +88,7 @@ export function parse<SubParsers extends Parser<any>[], Result>(template: Templa
   };
 }
 
-export function oneOf<R>(...parsers: Parser<T>[]): Parser<T> {
+export function oneOf<T>(...parsers: Parser<T>[]): Parser<T> {
   return input => {
     for (let parser of parsers) {
       const result = parser(input);
