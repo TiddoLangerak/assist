@@ -1,7 +1,11 @@
 import { Tail, Head } from '../tuple';
 
 export function chain<T extends any[]>(...funcs: FunctionChain<T>) : ChainResult<T> {
-  return null as any;
+  return funcs
+    .reduce(
+      (f1, f2) => (i: unknown) => f2(f1(i)),
+      <T>(i: T) => i
+    );
 }
 
 /**
