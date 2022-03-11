@@ -1,6 +1,6 @@
 import { Tail, Head } from '../tuple';
 
-export function chain<T extends any[]>(...funcs: FunctionChain<T>) : ChainResult<T> {
+export function chain<T extends readonly any[]>(...funcs: FunctionChain<T>) : ChainResult<T> {
   return funcs
     .reduce(
       (f1, f2) => (i: unknown) => f2(f1(i)),
@@ -11,7 +11,7 @@ export function chain<T extends any[]>(...funcs: FunctionChain<T>) : ChainResult
 /**
  * Validates a function chain. For valid function chains, this type resolves to whatever function chain was given. For invalid function chains, it resolves to an "intended" function chain, i.e. one that matches up to the first error.
  */
-export type FunctionChain<T> =
+export type FunctionChain<T extends readonly any[]> =
   T extends [(i: infer I) => infer O] // Base case: single function, always valid
     ? T
     : (
@@ -30,7 +30,7 @@ export type FunctionChain<T> =
 // E.g.:
 // ChainError<[3]> = [any => any];
 // ChainError<[I => O1, I2 => O2]> = [I => O1, O1 => any];
-type ChainError<T> = 
+type ChainError<T extends readonly any[]> = 
   // We check if at least the first value is valid, such that we can use it in our error type
   T extends [(i1: infer I) => infer O1, ...(infer REST)]
     // If it is, then we can assume the error is in the second function, and we'll return an intented type with correct signature for 2nd function.
@@ -38,7 +38,7 @@ type ChainError<T> =
     // If the first value isn't valid, then we return an intended type with a valid first func
     : [(i1: any) => any, ...any[]]
 
-export type ChainResult<F> =
+export type ChainResult<F extends readonly any[]> =
   F extends [(i: infer I) => any, ...any[], (i_: any) => infer O]
     ? (i: I) => O
     : never;
