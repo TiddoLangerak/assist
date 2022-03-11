@@ -3,3 +3,5 @@ export function expect(condition: boolean) : asserts condition is true {
     throw new Error("Failed expectation");
   }
 }
+
+export type ExpectType<Expectation, Reality extends Expectation> = Reality;
