@@ -21,6 +21,17 @@ export function $<SubParsers extends Parser<unknown>[]>(literals: TemplateString
   };
 }
 
+export function literal<T>(lit: string, result?: T): T {
+  const match = {
+    isMatch: true,
+    match: lit,
+    result: result ? result : lit
+  };
+  return input => input.startsWith(lit)
+    ? match
+    : nomatch;
+}
+
 export function parseRe<R>(re: RegExp, toResult?: Fn<RegExpMatchArray, R>): Parser<R> {
   if (re.global) {
     throw new Error("Cannot use global regexp");

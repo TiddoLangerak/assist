@@ -6,13 +6,18 @@ if (!dryrun) {
   throw new Error("Can only test in dryrun mode");
 }
 
-const mismatch = grammar("foobar");
-expect(!mismatch.isMatch);
+async function test() {
 
-const match = grammar("add suffix .bak to files and folders");
-expect(match.isMatch);
-match.result();
+  const mismatch = grammar("foobar");
+  expect(!mismatch.isMatch);
 
-const match2 = grammar("add suffix .wutwut to files and folders");
-expect(match2.isMatch);
-match2.result();
+  const match = grammar("add suffix .bak to files and folders");
+  expect(match.isMatch);
+  await match.result();
+
+  const match2 = grammar("add suffix .wutwut to files and folders");
+  expect(match2.isMatch);
+  await match2.result();
+}
+
+test();

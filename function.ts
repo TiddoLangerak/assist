@@ -6,4 +6,6 @@ export function pipe<I, F extends readonly any[]>(input: I, ...funcs: FunctionCh
   return chain(...funcs)(input) as ReturnType<ChainResult<I, F>>;
 }
 
+export type Predicate<T> = (input: T) => boolean;
+
 export { FunctionChain, ChainResult, chain };
