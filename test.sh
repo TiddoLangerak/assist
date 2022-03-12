@@ -1,8 +1,12 @@
 #!/bin/bash
 set -e;
 
-for t in *.test.ts; do 
-  echo "Testing $t";
-  ts-node $t > /dev/null;
-  printf "\n\n\n";
+trap 'rm -f "$TMPFILE"' EXIT
+
+TMPFILE=$(mktemp -p . "test.XXXXXX.ts")
+
+for t in *.test.ts **/*.test.ts; do 
+  echo "console.error(\"Testing $t\n\n\")" >> $TMPFILE;
+  echo "import \"./$t\";" >> $TMPFILE;
 done;
+ts-node $TMPFILE > /dev/null;
