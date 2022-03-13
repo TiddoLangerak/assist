@@ -1,4 +1,4 @@
-import { literal, parse, parseRe, $, Parser, oneOf } from './parser';
+import { parseRe, $, Parser, oneOf } from './parser';
 import * as ops from './operations';
 import { Operation } from './operations';
 import { FileSystemSelector, File } from './safefs';
@@ -21,23 +21,21 @@ const listFilePaths = () => pipe(
 const fileName: Parser<string> = parseRe(/\S+/);
 
 // TODO: support more targets
-const files: Parser<Predicate<File>> = literal('files', () => (f: File) => !f.isDir);
-const folder: Parser<Predicate<File>> = parse(
-  oneof(literal('folders'), literal('directories'), literal('dirs')),
-  () => (f: File) => f.isDir
-);
+const files: Parser<Predicate<File>> = $`files`(() => (f: File) => !f.isDir);
+// TODO: this one is broken
+const folder: Parser<Predicate<File>> = 
+  parseRe(/folders|directories|dirs/, (_) => (f: File) => f.isDir);
 const target : Parser<FileSystemSelector> = 
-  parse($`files and folders`, () => listFilePaths); 
+  $`files and folders`(() => listFilePaths); 
 
 const addSuffix = (suffix: string) => (input: Path) => path(`${input.fullPath}${suffix}`);
-const addSuffixOp = parse($`add suffix ${fileName}`, (suffix) => addSuffix(suffix));
+const addSuffixOp = $`add suffix ${fileName}`((suffix: string) => addSuffix(suffix));
 
 const renameOp = addSuffixOp;
 
 const rename : Parser<Operation> = 
-  parse(
-    $`${renameOp} to ${target}`,
-    (renameOp: (old: Path) => Path, Path>, target: FileSystemSelector) => {
+  $`${renameOp} to ${target}`(
+    (renameOp: (old: Path) => Path, target: FileSystemSelector) => {
       return () => ops.rename(renameOp)(target)
     }
   );
