@@ -1,13 +1,13 @@
 import { Fn } from './function';
-export type ParseResult<T> = { isMatch: false } | { isMatch: true, match: string, result: T };
+export type ParseResult<T> = { isMatch: false } | { isMatch: true, readonly match: string, readonly result: T };
 export type Parser<T> = (input: string) => ParseResult<T>;
 
 
 type ParseResultType<W> = W extends Parser<infer T> ? T : never;
-type ParseResultTypes<Tuple extends [...any[]]> = {
+type ParseResultTypes<Tuple extends readonly [...any[]]> = {
   [Index in keyof Tuple]: ParseResultType<Tuple[Index]>;
 };
-type ParseResultBuilder<SubParsers extends [...any[]], Result> = (...argws: ParseResultTypes<SubParsers>) => Result;
+type ParseResultBuilder<SubParsers extends readonly [...any[]], Result> = (...argws: ParseResultTypes<SubParsers>) => Result;
 
 export const nomatch : ParseResult<any> = { isMatch: false };
 
@@ -62,11 +62,13 @@ export function $
   };
 }
 
-export function literal(value: string): Parser<string> {
+export function literal(value: string): Parser<string>;
+export function literal<T>(value: string, result: T): Parser<T>;
+export function literal<T>(value: string, result?: T): Parser<T | string>{
   const match = {
     isMatch: true,
     match: value,
-    result: value
+    result: result ? result : value
   };
   return input => input.startsWith(value)
     ? match
@@ -101,5 +103,18 @@ export function oneOf<T>(...parsers: Parser<T>[]): Parser<T> {
       }
     }
     return nomatch;
+  }
+}
+
+export function mapResult<I, O>(parser: Parser<I>, map: (i: I) => O) : Parser<O> {
+  return input => {
+    const result = parser(input);
+    if (result.isMatch) {
+      return {
+        ...result,
+        result: map(result.result)
+      }
+    }
+    return result;
   }
 }

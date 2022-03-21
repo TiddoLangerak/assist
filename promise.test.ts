@@ -1,4 +1,5 @@
-import { Awaitable, AwaitableIterable } from './promise';
+import { Awaitable } from './promise';
+import { AwaitableIterable } from './awaitableIterable';
 
 // Just testing all sorts of scenarios
 

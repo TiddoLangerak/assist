@@ -1,5 +1,6 @@
 import { Path } from './path';
-import { Awaitable, AwaitableIterable } from './promise';
+import { Awaitable } from './promise';
+import { AwaitableIterable } from './awaitableIterable';
 import { Fn } from './function';
 import * as safefs from './safefs';
 import { FileSystemSelector } from './safefs';

@@ -1,7 +1,8 @@
 import { Path, path } from './path';
 import { logger } from './debug';
 import * as fs from 'fs/promises';
-import { Awaitable, AwaitableIterable } from './promise';
+import { Awaitable } from './promise';
+import { AwaitableIterable } from './awaitableIterable';
 
 const dryrunLog = logger('safefs-dryrun');
 export const dryrun = true;

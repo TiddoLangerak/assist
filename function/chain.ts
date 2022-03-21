@@ -1,5 +1,9 @@
 import { Tail, Head } from '../tuple';
+import { Fn } from '../function';
 
+// TODO: maybe more overloads when needed
+export function chain<I, O1, O>(f1: (i: I) => O1, f2: (i: O1) => O): (i: I) => O;
+export function chain<I, T extends readonly any[]>(...funcs: FunctionChain<I, T>) : ChainResult<I, T>;
 export function chain<I, T extends readonly any[]>(...funcs: FunctionChain<I, T>) : ChainResult<I, T> {
   return funcs
     .reduce(
